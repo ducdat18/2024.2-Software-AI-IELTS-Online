@@ -51,4 +51,3 @@ Open [http://localhost:3000](http://localhost:3000) in your browser
 - Bun
 - Shadcn UI
 - Tailwind CSS
->>>>>>> develop
