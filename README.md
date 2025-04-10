@@ -15,7 +15,7 @@ IELTS Online Test Website is a comprehensive online platform for IELTS exam prep
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/[your-username]/ielts-online-test-website.git
+git clone https://github.com/ducdat18/2024.2-Software-AI-IELTS-Online.git
 cd ielts-online-test-website
 ```
 
