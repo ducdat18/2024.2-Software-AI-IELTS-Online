@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-# 2024.2-Software-AI-IELTS-Online
-=======
 # 📚 IELTS Online Test Website with AI Support
 
 ## 🎯 Project Overview
