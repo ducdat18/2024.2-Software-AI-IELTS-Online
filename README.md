@@ -11,6 +11,15 @@ IELTS Online Test Website is a comprehensive online platform for IELTS exam prep
 - 💻 Git
 - 🖥 Modern web browser
 
+
+### 🛠 Install Bun
+
+Install Bun by running the command below in your terminal:
+
+```bash
+curl -fsSL https://bun.sh/install | bash
+```
+
 ## 🚀 Quick Start
 
 ### 1. Clone the Repository
