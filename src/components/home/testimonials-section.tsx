@@ -4,21 +4,21 @@ import { Button } from '@/components/ui/button';
 export default function TestimonialsSection() {
   const testimonials = [
     {
-      name: 'Nguyễn Thảo',
+      name: 'MoonWild',
       role: 'Student, Ho Chi Minh City',
       avatar: 'NT',
       content:
-        "I improved my IELTS Writing score from 6.0 to 7.5 after 3 months of using this platform. The AI ​​feedback is really detailed and helpful, helping me understand mistakes that I didn't notice before.",
+        "I improved my IELTS Writing score from 6.0 to 7.5 after 3 months of using this platform. The AI ​​feedback is really detailed and helpful, helping me understand mistakes that I didn't notice before. It's also help me get along with actual Ielts test",
     },
     {
-      name: 'Lê Hoàng',
+      name: 'Lê Hậu',
       role: 'Engineer, Da Nang',
       avatar: 'LH',
       content:
         'What I like most about this platform is the personalization. The AI ​​suggested exercises and materials based on my weaknesses, helping me focus on what needed the most improvement. As a result, my Reading score increased significantly.',
     },
     {
-      name: 'Tran Minh',
+      name: 'Kazuyuki114',
       role: 'IELTS Teacher, Hanoi',
       avatar: 'TM',
       content:
