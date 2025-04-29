@@ -1,11 +1,7 @@
-// src/app/(tests)/layout.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
 
 export default function TestsLayout({
   children,
@@ -15,7 +11,6 @@ export default function TestsLayout({
   const pathname = usePathname();
   const [activeTab, setActiveTab] = useState<string>('listening');
 
-  // Set active tab based on current path
   useEffect(() => {
     if (pathname.includes('/tests/listening')) {
       setActiveTab('listening');
@@ -26,12 +21,10 @@ export default function TestsLayout({
     }
   }, [pathname]);
 
-  // Check if we're on a test details page (e.g., /tests/listening/[testId])
   const isTestPage = /\/tests\/(listening|reading|writing)\/[^\/]+$/.test(
     pathname
   );
 
-  // Skip the navigation tabs for specific test pages
   if (isTestPage) {
     return <div className="min-h-screen bg-black pb-16">{children}</div>;
   }

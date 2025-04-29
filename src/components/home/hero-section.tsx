@@ -111,8 +111,6 @@ export default function HeroSection() {
                 </Button>
               </div>
             </div>
-
-            {/* Decorative elements */}
             <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-blue-600/20 rounded-full blur-2xl"></div>
             <div className="absolute -top-10 -left-10 w-40 h-40 bg-blue-900/20 rounded-full blur-2xl"></div>
           </div>

@@ -1,4 +1,3 @@
-// src/app/page.tsx
 import AIFeaturesSection from '@/components/home/ai-feature-section';
 import HeroSection from '@/components/home/hero-section';
 import SkillsSection from '@/components/home/skill-section';

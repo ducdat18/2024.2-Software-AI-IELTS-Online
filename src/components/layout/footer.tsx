@@ -189,7 +189,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="pt-8 border-t border-gray-800 text-center text-gray-400 text-sm">
+        <div className="pt-8 border-t border-gray-800 text-center text-gray-400 text-sm ">
           <p>© {currentYear} IELTS Online Test. Tất cả quyền được bảo lưu.</p>
         </div>
       </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -29,13 +29,11 @@ import {
 import { getTestById } from '@/mock/tests';
 import { ListeningQuestion, ListeningTest } from '@/types/test';
 
-interface PageParams {
-  params: {
-    testId: string;
-  };
-}
+export default function ListeningTestPageId() {
+  // Use the useParams hook to get route parameters
+  const params = useParams();
+  const testId = params.testId as string;
 
-export default function ListeningTestPageId({ params }: PageParams) {
   const router = useRouter();
   const [test, setTest] = useState<ListeningTest | null>(null);
   const [currentSection, setCurrentSection] = useState(0);
@@ -50,9 +48,9 @@ export default function ListeningTestPageId({ params }: PageParams) {
 
   // Load test data
   useEffect(() => {
-    console.log('Loading test with ID:', params.testId);
+    console.log('Loading test with ID:', testId);
 
-    const testData = getTestById(params.testId);
+    const testData = getTestById(testId);
     if (testData && testData.skill === 'listening') {
       setTest(testData as ListeningTest);
       setTimeRemaining(testData.duration * 60);
@@ -60,7 +58,7 @@ export default function ListeningTestPageId({ params }: PageParams) {
       console.log('Test not found or not a listening test:', testData);
       router.push('/tests/listening');
     }
-  }, [params.testId, router]);
+  }, [testId, router]);
 
   useEffect(() => {
     if (!isFinished && timeRemaining > 0) {
@@ -159,12 +157,11 @@ export default function ListeningTestPageId({ params }: PageParams) {
     return (answeredQuestions / totalQuestions) * 100;
   };
 
-  // Function to determine progress color based on percentage
   const getProgressColor = () => {
     const progress = calculateProgress();
-    if (progress < 33) return 'bg-red-500'; // Low progress
-    if (progress < 67) return 'bg-yellow-500'; // Medium progress
-    return 'bg-green-500'; // High progress
+    if (progress < 33) return 'bg-red-500';
+    if (progress < 67) return 'bg-yellow-500';
+    return 'bg-green-500';
   };
 
   const renderQuestion = (question: ListeningQuestion) => {

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
@@ -11,8 +12,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -29,20 +29,15 @@ import {
 import { getTestById } from '@/mock/tests';
 import { ReadingQuestion, ReadingTest } from '@/types/test';
 
-// Define highlight interface
 interface Highlight {
   id: string;
   text: string;
   color: string;
 }
 
-interface PageParams {
-  params: {
-    testId: string;
-  };
-}
-
-export default function ReadingTestPageId({ params }: PageParams) {
+export default function ReadingTestPageId() {
+  const params = useParams();
+  const testId = params.testId as string;
   const router = useRouter();
   const [test, setTest] = useState<ReadingTest | null>(null);
   const [currentSection, setCurrentSection] = useState(0);
@@ -55,24 +50,21 @@ export default function ReadingTestPageId({ params }: PageParams) {
   const passageRef = useRef<HTMLDivElement>(null);
   const [passageContent, setPassageContent] = useState<string>('');
 
-  // Highlight colors with labels
   const highlightColors = [
-    { name: 'Yellow', color: 'rgba(255, 255, 0, 0.4)' },
-    { name: 'Green', color: 'rgba(0, 255, 0, 0.4)' },
-    { name: 'Pink', color: 'rgba(255, 105, 180, 0.4)' },
-    { name: 'Blue', color: 'rgba(173, 216, 230, 0.4)' },
+    { name: 'Yellow', color: 'rgba(255, 255, 0, 0.55)' },
+    { name: 'Green', color: 'rgba(0, 255, 0, 0.55)' },
+    { name: 'Pink', color: 'rgba(255, 105, 180, 0.55)' },
+    { name: 'Blue', color: 'rgba(0, 191, 255, 0.55)' },
   ];
 
-  // Load test data
   useEffect(() => {
-    console.log('Loading test with ID:', params.testId);
+    console.log('Loading test with ID:', testId);
 
-    const testData = getTestById(params.testId);
+    const testData = getTestById(testId);
     if (testData && testData.skill === 'reading') {
       setTest(testData as ReadingTest);
       setTimeRemaining(testData.duration * 60);
 
-      // Format passage with paragraphs
       if ((testData as ReadingTest).passage) {
         const formattedPassage = (testData as ReadingTest).passage
           .split('\n\n')
@@ -87,38 +79,67 @@ export default function ReadingTestPageId({ params }: PageParams) {
       console.log('Test not found or not a reading test:', testData);
       router.push('/tests/reading');
     }
-  }, [params.testId, router]);
+  }, [testId, router]);
 
-  // Apply highlights when highlights change
   useEffect(() => {
-    if (!test) return;
+    if (!test || !passageRef.current) return;
 
-    let highlightedContent = passageContent;
-
-    // Apply highlights to content
-    // Sort highlights by length (longest first) to avoid nested highlighting issues
-    const sortedHighlights = [...highlights].sort(
-      (a, b) => b.text.length - a.text.length
-    );
-
-    sortedHighlights.forEach((highlight) => {
-      // Escape special regex characters in the search text
-      const escapedText = highlight.text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-      // Use regex to replace all occurrences, but avoid replacing inside HTML tags
-      const regex = new RegExp(`(${escapedText})(?![^<]*>|[^<>]*<\/)`, 'g');
-      highlightedContent = highlightedContent.replace(
-        regex,
-        `<span class="highlight-text" style="background-color: ${highlight.color};">$1</span>`
-      );
-    });
+    console.log('Applying highlights:', highlights);
 
     if (passageRef.current) {
-      passageRef.current.innerHTML = highlightedContent;
+      passageRef.current.innerHTML = passageContent;
     }
+
+    if (highlights.length === 0) return;
+
+    const walker = document.createTreeWalker(
+      passageRef.current,
+      NodeFilter.SHOW_TEXT,
+      null
+    );
+
+    const textNodes = [];
+    let currentNode;
+
+    while ((currentNode = walker.nextNode())) {
+      textNodes.push({
+        node: currentNode,
+        parent: currentNode.parentNode,
+      });
+    }
+
+    textNodes.forEach(({ node, parent }) => {
+      const originalText = node.nodeValue || '';
+      let modifiedText = originalText;
+      let didReplace = false;
+
+      highlights.forEach((highlight) => {
+        if (originalText.includes(highlight.text)) {
+          console.log(
+            `Found match for "${highlight.text}" in node:`,
+            originalText
+          );
+          didReplace = true;
+          const highlightHtml = `<mark style="background-color: ${highlight.color} !important; color: inherit !important; padding: 2px !important; border-radius: 2px !important;">${highlight.text}</mark>`;
+          modifiedText = modifiedText.replace(highlight.text, highlightHtml);
+        }
+      });
+
+      if (didReplace) {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = modifiedText;
+        const fragment = document.createDocumentFragment();
+        while (tempDiv.firstChild) {
+          fragment.appendChild(tempDiv.firstChild);
+        }
+
+        parent.replaceChild(fragment, node);
+      }
+    });
+
+    console.log('Highlighting complete, updated DOM');
   }, [highlights, passageContent, test]);
 
-  // Timer effect
   useEffect(() => {
     if (!isFinished && timeRemaining > 0) {
       const timer = setInterval(() => {
@@ -134,24 +155,34 @@ export default function ReadingTestPageId({ params }: PageParams) {
     }
   }, [isFinished, timeRemaining]);
 
-  // Highlight selected text with the active color
   const handleMouseUp = () => {
-    if (!activeColor) return;
+    if (!activeColor) {
+      console.log('No active color selected, skipping highlight');
+      return;
+    }
 
     const selection = window.getSelection();
-    if (!selection || selection.toString().trim() === '') return;
-
+    if (!selection || selection.toString().trim() === '') {
+      console.log('No text selected, skipping highlight');
+      return;
+    }
     const selectedText = selection.toString().trim();
+
     if (selectedText) {
-      const newHighlight: Highlight = {
+      console.log(`Selected text: "${selectedText}"`);
+      const newHighlight = {
         id: `highlight-${Date.now()}`,
         text: selectedText,
         color: activeColor,
       };
 
-      setHighlights((prev) => [...prev, newHighlight]);
+      console.log('Creating new highlight:', newHighlight);
+      setHighlights((prev) => {
+        const newHighlights = [...prev, newHighlight];
+        console.log('Updated highlights array:', newHighlights);
+        return newHighlights;
+      });
 
-      // Clear selection after a short delay to show the highlight effect
       setTimeout(() => {
         if (window.getSelection) {
           window.getSelection()?.removeAllRanges();
@@ -160,18 +191,26 @@ export default function ReadingTestPageId({ params }: PageParams) {
     }
   };
 
-  // Function to toggle highlight color selection
   const toggleHighlightColor = (color: string) => {
-    setActiveColor((prev) => (prev === color ? null : color));
+    console.log('Toggling highlight color:', color);
+    setActiveColor((prev) => {
+      const newColor = prev === color ? null : color;
+      console.log('New active color:', newColor);
+      return newColor;
+    });
   };
 
-  // Clear all highlights
   const clearHighlights = () => {
+    console.log('Clearing all highlights');
     setHighlights([]);
     setActiveColor(null);
+
+    if (passageRef.current && passageContent) {
+      passageRef.current.innerHTML = passageContent;
+      console.log('Reset passage content to original');
+    }
   };
 
-  // Format time display (MM:SS)
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -180,7 +219,6 @@ export default function ReadingTestPageId({ params }: PageParams) {
       .padStart(2, '0')}`;
   };
 
-  // Handle answer changes
   const handleAnswerChange = (
     questionId: string,
     answer: string | string[]
@@ -191,7 +229,6 @@ export default function ReadingTestPageId({ params }: PageParams) {
     }));
   };
 
-  // Handle test submission
   const handleSubmit = () => {
     setIsFinished(true);
     setConfirmSubmit(false);
@@ -200,7 +237,6 @@ export default function ReadingTestPageId({ params }: PageParams) {
     // router.push(`/results/reading-result-id`);
   };
 
-  // Navigation between sections
   const handleNextSection = () => {
     if (test && currentSection < test.sections.length - 1) {
       setCurrentSection(currentSection + 1);
@@ -213,7 +249,6 @@ export default function ReadingTestPageId({ params }: PageParams) {
     }
   };
 
-  // Calculate overall progress
   const calculateProgress = () => {
     if (!test) return 0;
 
@@ -225,15 +260,13 @@ export default function ReadingTestPageId({ params }: PageParams) {
     return (answeredQuestions / totalQuestions) * 100;
   };
 
-  // Get progress color based on percentage
   const getProgressColor = () => {
     const progress = calculateProgress();
-    if (progress < 33) return 'bg-red-500'; // Low progress
-    if (progress < 67) return 'bg-yellow-500'; // Medium progress
+    if (progress < 33) return 'bg-red-500';
+    if (progress < 67) return 'bg-yellow-500';
     return 'bg-green-500'; // High progress
   };
 
-  // Render question based on type
   const renderQuestion = (question: ReadingQuestion) => {
     switch (question.type) {
       case 'multiple_choice':
@@ -437,9 +470,7 @@ export default function ReadingTestPageId({ params }: PageParams) {
         </Tabs>
       </div>
 
-      {/* Split screen layout */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Reading passage */}
         <div>
           <Card className="bg-gray-800 border-gray-700 h-full">
             <CardHeader className="pb-2">
@@ -503,13 +534,13 @@ export default function ReadingTestPageId({ params }: PageParams) {
                   WebkitUserSelect: 'text',
                   MozUserSelect: 'text',
                   cursor: activeColor ? 'pointer' : 'text',
+                  position: 'relative',
                 }}
               />
             </CardContent>
           </Card>
         </div>
 
-        {/* Questions */}
         <div>
           <Card className="bg-gray-800 border-gray-700 h-full">
             <CardHeader>
@@ -652,7 +683,6 @@ export default function ReadingTestPageId({ params }: PageParams) {
         </div>
       </div>
 
-      {/* Add CSS to enhance text selection and highlighting */}
       <style jsx global>{`
         /* Improve text selection appearance */
         ::selection {
@@ -678,12 +708,15 @@ export default function ReadingTestPageId({ params }: PageParams) {
           background-color: rgba(255, 255, 255, 0.05);
         }
 
-        /* Style for highlighted text */
-        .highlight-text {
-          border-radius: 2px;
-          padding: 0 2px;
-          display: inline-block;
-          line-height: 1.2em;
+        /* Enhanced style for mark elements - BRIGHTER HIGHLIGHTS WITH ORIGINAL TEXT COLOR */
+        mark {
+          background-color: inherit !important;
+          color: inherit !important;
+          padding: 2px !important;
+          border-radius: 2px !important;
+          box-decoration-break: clone !important;
+          -webkit-box-decoration-break: clone !important;
+          display: inline !important;
         }
       `}</style>
     </div>
