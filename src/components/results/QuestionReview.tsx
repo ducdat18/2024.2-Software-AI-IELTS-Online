@@ -48,6 +48,15 @@ export default function QuestionReview({ sections }: QuestionReviewProps) {
     setCurrentSection(value);
   };
 
+  // Get badge color based on percentage
+  const getBadgeColor = (correct: number, total: number) => {
+    const percentage = (correct / total) * 100;
+    if (percentage >= 80) return 'bg-green-600';
+    if (percentage >= 60) return 'bg-blue-600';
+    if (percentage >= 40) return 'bg-yellow-600';
+    return 'bg-red-600';
+  };
+
   return (
     <Card className="bg-gray-800 border-gray-700">
       <CardHeader>
@@ -58,20 +67,27 @@ export default function QuestionReview({ sections }: QuestionReviewProps) {
       </CardHeader>
       <CardContent>
         <Tabs value={currentSection} onValueChange={handleSectionChange}>
-          <TabsList className="grid grid-cols-3 bg-gray-700 mb-6 h-auto p-1">
-            {sections.map((section, index) => (
-              <TabsTrigger
-                key={index}
-                value={index.toString()}
-                className="text-gray-400 data-[state=active]:text-white data-[state=active]:bg-gray-600 py-2"
-              >
-                {section.title}
-                <Badge className="ml-2 bg-gray-600 text-xs">
-                  {section.questions.filter((q) => q.isCorrect).length}/
-                  {section.questions.length}
-                </Badge>
-              </TabsTrigger>
-            ))}
+          <TabsList className="flex bg-gray-700 mb-6 h-auto p-1 overflow-x-auto">
+            {sections.map((section, index) => {
+              const correctCount = section.questions.filter(
+                (q) => q.isCorrect
+              ).length;
+              const totalCount = section.questions.length;
+              const badgeColor = getBadgeColor(correctCount, totalCount);
+
+              return (
+                <TabsTrigger
+                  key={index}
+                  value={index.toString()}
+                  className="flex-shrink-0 text-gray-400 data-[state=active]:text-white data-[state=active]:bg-gray-600 py-2 px-4"
+                >
+                  {section.title}
+                  <Badge className={`ml-2 ${badgeColor} text-xs`}>
+                    {correctCount}/{totalCount}
+                  </Badge>
+                </TabsTrigger>
+              );
+            })}
           </TabsList>
 
           {sections.map((section, sectionIndex) => (

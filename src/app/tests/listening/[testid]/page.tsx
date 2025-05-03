@@ -81,13 +81,13 @@ export default function ListeningTestPageId() {
     console.log('Submitted answers:', answers);
 
     // Tạo ID kết quả (trong thực tế, ID này sẽ được trả về từ API sau khi lưu kết quả)
-    const resultId = `listening-result-${Date.now()}`;
+    const resultId = testId.replace('test', 'result');
 
     // Trong môi trường thực tế, bạn sẽ gửi dữ liệu đến API ở đây
     // await submitTestResult(testId, answers, ...);
 
     // Chuyển hướng đến trang kết quả
-    router.push(`/results/listening/${resultId}`);
+    router.push(`/tests/results/listening/${resultId}`);
   };
 
   // Handle timer completion

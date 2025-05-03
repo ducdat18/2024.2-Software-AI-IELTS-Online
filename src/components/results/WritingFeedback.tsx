@@ -62,6 +62,19 @@ export default function WritingFeedback({
     return 'text-red-500';
   };
 
+  // Get badge background color based on score
+  const getBadgeBgColor = (score: number) => {
+    if (score >= 7) return 'bg-green-600';
+    if (score >= 6) return 'bg-blue-600';
+    if (score >= 5) return 'bg-yellow-600';
+    return 'bg-red-600';
+  };
+
+  // Calculate percentage for progress bar
+  const getScorePercentage = (score: number) => {
+    return (score / 9) * 100;
+  };
+
   // Handle value change with proper type casting
   const handleValueChange = (value: string) => {
     // Make sure value is either 'task1' or 'task2'
@@ -85,7 +98,7 @@ export default function WritingFeedback({
               className="text-gray-400 data-[state=active]:text-black"
             >
               {formatTaskType(task.type)}
-              <Badge className="ml-2 bg-gray-600">
+              <Badge className={`ml-2 ${getBadgeBgColor(task.score)}`}>
                 {task.score.toFixed(1)}
               </Badge>
             </TabsTrigger>
@@ -100,9 +113,21 @@ export default function WritingFeedback({
                   <CardHeader>
                     <CardTitle className="text-white flex justify-between items-center">
                       <span>{formatTaskType(task.type)} - Your Answer</span>
-                      <Badge className={`text-sm ${getScoreColor(task.score)}`}>
-                        Score: {task.score.toFixed(1)}
-                      </Badge>
+                      <div className="flex flex-col items-center">
+                        <Badge
+                          className={`text-sm ${getBadgeBgColor(task.score)}`}
+                        >
+                          Score: {task.score.toFixed(1)}
+                        </Badge>
+                        <div className="w-16 h-1 mt-1 bg-gray-700 rounded-full overflow-hidden">
+                          <div
+                            className={`h-full ${getBadgeBgColor(task.score)}`}
+                            style={{
+                              width: `${getScorePercentage(task.score)}%`,
+                            }}
+                          ></div>
+                        </div>
+                      </div>
                     </CardTitle>
                     <CardDescription className="text-gray-400">
                       Word count: {task.wordCount}
@@ -137,9 +162,23 @@ export default function WritingFeedback({
                             <h3 className="text-white font-medium">
                               {criterion.name}
                             </h3>
-                            <Badge className="bg-gray-600">
+                            <Badge
+                              className={`${getBadgeBgColor(criterion.score)}`}
+                            >
                               {criterion.score}/9
                             </Badge>
+                          </div>
+                          <div className="w-full h-1 mb-3 bg-gray-700 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full ${getBadgeBgColor(
+                                criterion.score
+                              )}`}
+                              style={{
+                                width: `${getScorePercentage(
+                                  criterion.score
+                                )}%`,
+                              }}
+                            ></div>
                           </div>
                           <p className="text-gray-300 mb-3 text-sm">
                             {criterion.feedback}

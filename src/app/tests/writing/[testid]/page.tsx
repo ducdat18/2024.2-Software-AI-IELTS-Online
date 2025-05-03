@@ -131,13 +131,13 @@ export default function WritingTestPageId() {
     console.log('Word counts:', wordCounts);
 
     // Tạo ID kết quả (trong thực tế, ID này sẽ được trả về từ API sau khi lưu kết quả)
-    const resultId = `writing-result-${Date.now()}`;
+    const resultId = testId.replace('test', 'result');
 
     // Trong môi trường thực tế, bạn sẽ gửi dữ liệu đến API ở đây
     // await submitTestResult(testId, answers, wordCounts, ...);
 
     // Chuyển hướng đến trang kết quả
-    router.push(`/results/writing/${resultId}`);
+    router.push(`/tests/results/writing/${resultId}`);
   };
 
   // Handle timer completion

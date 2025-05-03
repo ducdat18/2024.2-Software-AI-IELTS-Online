@@ -835,7 +835,8 @@ export function getResultsByUserId(userId: string): TestResultBase[] {
 
 // Helper function to get detailed result by ID and type
 export function getDetailedResultById(resultId: string): ReadingTestResult | ListeningTestResult | WritingTestResult | undefined {
-  // First determine the type of result
+  console.log("Looking for result with ID:", resultId);
+  console.log("Available listening results:", mockListeningResults.map(r => r.id));
   const result = getResultById(resultId);
   if (!result) return undefined;
   

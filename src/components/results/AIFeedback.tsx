@@ -42,6 +42,19 @@ export default function AIFeedback({
     return 'text-red-500';
   };
 
+  // Get badge background color based on score
+  const getBadgeBgColor = (score: number) => {
+    if (score >= 7) return 'bg-green-600';
+    if (score >= 6) return 'bg-blue-600';
+    if (score >= 5) return 'bg-yellow-600';
+    return 'bg-red-600';
+  };
+
+  // Calculate percentage for progress bar
+  const getScorePercentage = (score: number) => {
+    return (score / 9) * 100;
+  };
+
   return (
     <div className="space-y-6">
       <Card className="bg-gray-800 border-gray-700">
@@ -77,15 +90,19 @@ export default function AIFeedback({
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="text-white font-medium">{area.title}</h3>
                   {area.score !== undefined && (
-                    <Badge
-                      className={`bg-gray-700 ${
-                        area.score ? getScoreColor(area.score) : ''
-                      }`}
-                    >
+                    <Badge className={`${getBadgeBgColor(area.score)}`}>
                       {area.score}/9
                     </Badge>
                   )}
                 </div>
+                {area.score !== undefined && (
+                  <div className="w-full h-1 mb-3 bg-gray-700 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full ${getBadgeBgColor(area.score)}`}
+                      style={{ width: `${getScorePercentage(area.score)}%` }}
+                    ></div>
+                  </div>
+                )}
                 <p className="text-gray-300 mb-3">{area.description}</p>
                 {area.suggestions && area.suggestions.length > 0 && (
                   <div>
@@ -109,7 +126,12 @@ export default function AIFeedback({
                 </h3>
                 <ul className="list-disc pl-5 space-y-2 text-gray-300">
                   {improvementPoints.map((point, idx) => (
-                    <li key={idx}>{point}</li>
+                    <li
+                      key={idx}
+                      className="py-1 border-b border-gray-700 last:border-0"
+                    >
+                      {point}
+                    </li>
                   ))}
                 </ul>
               </div>
