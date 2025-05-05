@@ -61,12 +61,12 @@ export default function Header() {
         </nav>
 
         <div className="hidden md:flex items-center space-x-4">
-          <Link href="/login">
+          <Link href="/auth/login">
             <Button variant="outline" className="border-blue-500 text-black">
               Login
             </Button>
           </Link>
-          <Link href="/register">
+          <Link href="/auth/register">
             <Button className="bg-blue-600 hover:bg-blue-700 text-white">
               Register
             </Button>
