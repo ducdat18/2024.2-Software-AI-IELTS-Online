@@ -2,24 +2,100 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+// Mock user data for demonstration - in a real app, this would come from your API/backend
+const mockUsers = [
+  { email: 'admin@example.com', password: 'admin123', role: 'admin' },
+  {
+    email: 'content@example.com',
+    password: 'content123',
+    role: 'content-manager',
+  },
+  { email: 'user@example.com', password: 'user123', role: 'user' },
+];
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle login logic here
-    console.log('Login with:', { email, password, rememberMe });
+    setIsLoading(true);
+
+    try {
+      // In a real app, this would be an API call to your authentication endpoint
+      // For demo purposes, we're using the mock data
+      const user = mockUsers.find(
+        (user) => user.email === email && user.password === password
+      );
+
+      // Simulate API delay
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      if (user) {
+        // Successfully authenticated
+        console.log('Login successful:', user);
+
+        // Store user info in localStorage or sessionStorage
+        // In a real app, you would store a JWT token or session info
+        localStorage.setItem(
+          'user',
+          JSON.stringify({
+            email: user.email,
+            role: user.role,
+          })
+        );
+
+        toast.success('Login successful! Redirecting...');
+
+        // Redirect based on user role
+        setTimeout(() => {
+          if (user.role === 'content-manager') {
+            router.push('/content-manager');
+          } else if (user.role === 'admin') {
+            router.push('/admin/dashboard');
+          } else {
+            router.push('/dashboard'); // Default redirect for regular users
+          }
+        }, 1000); // Small delay to show the success toast
+      } else {
+        // Authentication failed
+        toast.error('Invalid email or password. Please try again.');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      toast.error('An error occurred during login. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center relative overflow-hidden">
+      {/* ToastContainer for react-toastify */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark" // Use dark theme to match your UI
+      />
+
       {/* Background elements */}
       <div className="absolute inset-0 bg-gradient-to-b from-gray-900 to-black"></div>
       <div className="absolute inset-0 bg-[url('/images/hero-bg.jpg')] bg-cover bg-center opacity-20"></div>
@@ -101,8 +177,35 @@ export default function LoginPage() {
                 <Button
                   type="submit"
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white py-6"
+                  disabled={isLoading}
                 >
-                  Sign In
+                  {isLoading ? (
+                    <>
+                      <svg
+                        className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      Signing In...
+                    </>
+                  ) : (
+                    'Sign In'
+                  )}
                 </Button>
               </form>
 
@@ -114,6 +217,28 @@ export default function LoginPage() {
                 >
                   Sign up now
                 </Link>
+              </div>
+
+              {/* Demo Credentials */}
+              <div className="mt-6 pt-6 border-t border-gray-800">
+                <p className="text-gray-400 text-sm mb-2">Demo Accounts:</p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs">
+                  <div className="bg-gray-800 p-2 rounded">
+                    <p className="text-gray-300">Content Manager</p>
+                    <p className="text-gray-400">content@example.com</p>
+                    <p className="text-gray-400">content123</p>
+                  </div>
+                  <div className="bg-gray-800 p-2 rounded">
+                    <p className="text-gray-300">Admin</p>
+                    <p className="text-gray-400">admin@example.com</p>
+                    <p className="text-gray-400">admin123</p>
+                  </div>
+                  <div className="bg-gray-800 p-2 rounded">
+                    <p className="text-gray-300">Regular User</p>
+                    <p className="text-gray-400">user@example.com</p>
+                    <p className="text-gray-400">user123</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
